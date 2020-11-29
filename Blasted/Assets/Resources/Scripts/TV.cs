@@ -32,12 +32,18 @@ public class TV : MonoBehaviour
 	{
 		if (collision.tag == "Player")
 		{
-			_playing = true;
-			StartCoroutine(Show());
-
-			collision.gameObject.GetComponent<Player>().CanMoveCrosshair = false;
+			PlayTV(collision);
 		}
 		
+	}
+
+	public void PlayTV(Collider2D collision = null)
+	{
+		_playing = true;
+		StartCoroutine(Show());
+
+		if(collision != null)
+		collision.gameObject.GetComponent<Player>().CanMoveCrosshair = false;
 	}
 
 	private void OnTriggerExit2D(Collider2D collision)
@@ -66,6 +72,7 @@ public class TV : MonoBehaviour
 	{
 		if (_firstPlay)
 		{
+			bool typing = false;
 			for (int i = 0; i < TextToType.Length; i++)
 			{
 				if (!_playing)
@@ -74,12 +81,18 @@ public class TV : MonoBehaviour
 				yield return new WaitForSeconds(WaitTime);
 				ShowText[0].text += TextToType[i];
 				ShowText[1].text += TextToType[i];
+
+				if(!typing)
+				SoundManager.PlaySound(SoundManager.Sound.WordTyping);
+
+				typing = !typing;
 			}
 		}
 		else
 		{
 			ShowText[0].text = TextToType;
 			ShowText[1].text = TextToType;
+			SoundManager.PlaySound(SoundManager.Sound.WordTyping);
 		}
 			
 	}
@@ -92,6 +105,7 @@ public class TV : MonoBehaviour
 		}
 		yield return new WaitForSeconds(.5f);
 		_character.SetActive(true);
+
 		foreach(Text text in ShowText)
 		{
 			text.enabled = true;

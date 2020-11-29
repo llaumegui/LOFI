@@ -16,9 +16,16 @@ public class Player : MonoBehaviour
 	public Transform SwordUI;
 	public Transform Legs;
 
+	[Header("GameObjects")]
+	public GameObject SwordBack;
+	public GameObject GunBack;
+	public GameObject Bullet;
+	public GameObject BlackScreen;
+
+	TV _endScreen;
+
 	[Header("")]
 	public float Speed;
-	bool _dead;
 	Vector2 _direction;
 	Vector2 _crosshairDirection;
 	Rigidbody2D _rb;
@@ -28,8 +35,17 @@ public class Player : MonoBehaviour
 
 	public float MaxCrosshairDistance;
 
-	bool _sword;
-	bool _gun;
+	public float SlashCooldown;
+	public float ShootCooldown;
+
+	public bool _sword;
+	bool _usingSword;
+	public bool _gun;
+	bool _usingGun;
+
+	public bool Hurt;
+
+	public Vector2 _respawnPosition;
 
 	[HideInInspector]
 	public bool CanMoveCrosshair = true;
@@ -37,34 +53,102 @@ public class Player : MonoBehaviour
 	[HideInInspector]
 	public bool CanMove = true;
 
+	bool _canUseSword = true;
+	bool _canShoot = true;
+
+	IEnumerator _sheathe;
+
 	int _leg;
+
+	public SoundManager.Sound LoopToPlay;
+
+	[HideInInspector]
+	public bool IsInFinalZone;
 
 	private void Awake()
 	{
+		LoopToPlay = SoundManager.Sound.MusicMenu;
+		_endScreen = GetComponent<TV>();
+
 		Sword.gameObject.SetActive(false);
 		Gun.gameObject.SetActive(false);
 		SwordUI.gameObject.SetActive(false);
 		Legs.gameObject.SetActive(false);
+
+		_sheathe = Sheathe();
+
+		ShowWeapons();
 
 		_thisTransform = GetComponent<Transform>();
 
 		_rb = GetComponent<Rigidbody2D>();
 
 		StartCoroutine(LegsMoving());
+
+
+		StartCoroutine(FadeIn(1));
 	}
 
 	private void Update()
 	{
-		if (Input.GetMouseButtonDown(0) && _sword && !_dead)
+		if (Input.GetMouseButtonDown(0) && _sword && CanMove && _canUseSword)
 			Slash();
-		if (Input.GetMouseButtonDown(1) && _gun && !_dead)
+		if (Input.GetMouseButton(1) && _gun && CanMove && _canShoot)
 			Shoot();
+
+		if (_sword || _gun)
+			ShowWeapons();
 	}
 
 	private void FixedUpdate()
 	{
-		if(!_dead && CanMove)
+		if(CanMove)
 		Movement();
+	}
+
+	void ShowWeapons()
+	{
+		if (_sword)
+		{
+			SwordUI.gameObject.SetActive(true);
+			if (_canUseSword)
+				SwordUI.GetChild(0).gameObject.SetActive(true);
+			else
+				SwordUI.GetChild(0).gameObject.SetActive(false);
+		}
+
+		if(_gun && !_usingGun)
+		{
+			Gun.gameObject.SetActive(false);
+			GunBack.SetActive(true);
+		}
+		if (_sword && !_usingSword)
+		{
+			Sword.gameObject.SetActive(false);
+			SwordBack.SetActive(true);
+		}
+		if (_gun && _usingGun)
+		{
+			Gun.gameObject.SetActive(true);
+			GunBack.SetActive(false);
+		}
+		if (_sword && _usingSword)
+		{
+			Sword.gameObject.SetActive(true);
+			SwordBack.SetActive(false);
+		}
+
+		if(!_gun)
+		{
+			Gun.gameObject.SetActive(false);
+			GunBack.SetActive(false);
+		}
+		if (!_sword)
+		{
+			Sword.gameObject.SetActive(false);
+			SwordBack.SetActive(false);
+		}
+
 	}
 
 	void Movement()
@@ -128,20 +212,65 @@ public class Player : MonoBehaviour
 
 	void Slash()
 	{
+		Sword.GetChild(0).localPosition = Vector3.zero;
+		_usingSword = true;
+		_canUseSword = false;
 
+		StartCoroutine(SwordCoolDown());
+
+		SoundManager.PlaySound(SoundManager.Sound.Woosh);
+	}
+
+	IEnumerator SwordCoolDown()
+	{
+		yield return new WaitForSeconds(.25f);
+		_usingSword = false;
+		yield return new WaitForSeconds(SlashCooldown);
+		_canUseSword = true;
+
+		SoundManager.PlaySound(SoundManager.Sound.MenuOk);
 	}
 
 	void Shoot()
 	{
+		_usingGun = true;
 
+		StartCoroutine(ShootingCooldown());
+
+		StopCoroutine(_sheathe);
+		_sheathe = Sheathe();
+		StartCoroutine(_sheathe);
+
+		Vector2 direction = _head.up;
+		GameObject bullet = Instantiate(Bullet, (Vector2)transform.position + direction, Quaternion.identity);
+		bullet.GetComponent<Bullet>().Direction = direction.normalized;
+
+		SoundManager.PlaySound(SoundManager.Sound.Woosh);
+	}
+
+	IEnumerator ShootingCooldown()
+	{
+		_canShoot = false;
+		yield return new WaitForSeconds(ShootCooldown);
+		_canShoot = true;
+	}
+
+	IEnumerator Sheathe()
+	{
+		yield return new WaitForSeconds(1f);
+		_usingGun = false;
 	}
 
 	private void OnCollisionEnter2D(Collision2D collision)
 	{
 		if(collision.gameObject.tag == "Ennemy")
 		{
-			Debug.Log("MORT");
+			Hurt = true;
+			SoundManager.PlaySound(SoundManager.Sound.Dead);
+			StartCoroutine(FadeOut());
 		}
+		if (collision.gameObject.tag == "Sword")
+			Physics2D.IgnoreCollision(collision.collider, GetComponent<Collider2D>());
 	}
 
 	IEnumerator LegsMoving()
@@ -162,6 +291,8 @@ public class Player : MonoBehaviour
 				Legs.GetChild(1).gameObject.SetActive(true);
 			}
 
+			SoundManager.PlaySound(SoundManager.Sound.Walk);
+
 		}
 		else
 		{
@@ -175,4 +306,86 @@ public class Player : MonoBehaviour
 		StartCoroutine(LegsMoving());
 	}
 
+	public IEnumerator Waiting(float Wait = 1)
+	{
+		_rb.velocity = Vector3.zero;
+		_direction = Vector2.zero;
+		CanMove = false;
+		yield return new WaitForSeconds(Wait);
+		CanMove = true;
+
+		if(IsInFinalZone)
+		{
+			//fin du jeu
+		}
+	}
+
+	public IEnumerator FadeOut(float wait = .5f)
+	{
+		_rb.velocity = Vector3.zero;
+		_direction = Vector2.zero;
+		CanMove = false;
+		Destroy(SoundAssets.i.AudioLoops[0]);
+		SoundAssets.i.AudioLoops = new List<GameObject>();
+
+		SpriteRenderer renderer = BlackScreen.GetComponent<SpriteRenderer>();
+		renderer.color = new Color(0, 0, 0, 0);
+
+		yield return new WaitForSeconds(wait);
+
+		renderer.color = new Color(0, 0, 0, .25f);
+
+
+		yield return new WaitForSeconds(wait);
+
+		renderer.color = new Color(0, 0, 0, .5f);
+
+
+		yield return new WaitForSeconds(wait);
+
+		renderer.color = new Color(0, 0, 0, 1f);
+
+
+		if(IsInFinalZone)
+		{
+			_endScreen.PlayTV();
+			StartCoroutine(Waiting(5));
+		}
+		else
+		{
+			Hurt = false;
+			StartCoroutine(FadeIn(wait));
+			transform.position = _respawnPosition;
+		}
+
+	}
+
+	IEnumerator FadeIn(float wait = .5f)
+	{
+		_rb.velocity = Vector3.zero;
+		_direction = Vector2.zero;
+		CanMove = false;
+
+		SpriteRenderer renderer = BlackScreen.GetComponent<SpriteRenderer>();
+		renderer.color = new Color(0, 0, 0, 1);
+
+		yield return new WaitForSeconds(wait);
+
+		renderer.color = new Color(0, 0, 0, .5f);
+
+
+		yield return new WaitForSeconds(wait);
+
+		renderer.color = new Color(0, 0, 0, .25f);
+
+
+		yield return new WaitForSeconds(wait);
+
+		renderer.color = new Color(0, 0, 0, 0f);
+
+		CanMove = true;
+
+		if (!IsInFinalZone)
+		SoundManager.PlayLoop("music", LoopToPlay,1,true);
+	}
 }
