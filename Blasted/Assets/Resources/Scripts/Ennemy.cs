@@ -111,18 +111,24 @@ public class Ennemy : MonoBehaviour
 		if(collision.gameObject.tag == "Sword" || collision.gameObject.tag == "Bullet")
 		{
 			Debug.Log("hurt");
-			StartCoroutine(Hurt());
+			if(collision.gameObject.tag == "Sword")
+				StartCoroutine(Hurt(true));
+			else
+				StartCoroutine(Hurt());
 
 			if (collision.gameObject.tag == "Bullet")
 				Destroy(collision.gameObject);
 		}
 	}
 
-	IEnumerator Hurt()
+	IEnumerator Hurt(bool sword = false)
 	{
 		SoundManager.PlaySound(SoundManager.Sound.Kill);
 
-		HP--;
+		if (!sword)
+			HP--;
+		else
+			HP -= 2;
 
 		transform.position = ((transform.position - Target.position).normalized * 2) + transform.position;
 

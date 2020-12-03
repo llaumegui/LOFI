@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -265,8 +266,9 @@ public class Player : MonoBehaviour
 	{
 		if(collision.gameObject.tag == "Ennemy")
 		{
+			if(!Hurt)
+				SoundManager.PlaySound(SoundManager.Sound.Dead);
 			Hurt = true;
-			SoundManager.PlaySound(SoundManager.Sound.Dead);
 			StartCoroutine(FadeOut());
 		}
 		if (collision.gameObject.tag == "Sword")
@@ -306,7 +308,7 @@ public class Player : MonoBehaviour
 		StartCoroutine(LegsMoving());
 	}
 
-	public IEnumerator Waiting(float Wait = 1)
+	public IEnumerator Waiting(float Wait = 1,bool final = false)
 	{
 		_rb.velocity = Vector3.zero;
 		_direction = Vector2.zero;
@@ -314,9 +316,9 @@ public class Player : MonoBehaviour
 		yield return new WaitForSeconds(Wait);
 		CanMove = true;
 
-		if(IsInFinalZone)
+		if(final)
 		{
-			//fin du jeu
+			SceneManager.LoadScene(0);
 		}
 	}
 
@@ -349,7 +351,7 @@ public class Player : MonoBehaviour
 		if(IsInFinalZone)
 		{
 			_endScreen.PlayTV();
-			StartCoroutine(Waiting(5));
+			StartCoroutine(Waiting(10,true));
 		}
 		else
 		{

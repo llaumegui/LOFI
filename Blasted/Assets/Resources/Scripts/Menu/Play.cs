@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Play : Menu
-{	public override void Select()
+{	
+	public override void Select()
 	{
 		StartCoroutine(Wait());
 	}

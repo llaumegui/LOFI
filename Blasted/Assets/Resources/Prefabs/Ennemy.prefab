@@ -457,7 +457,7 @@ MonoBehaviour:
   HP: 2
   SpawnTransition: 0.5
   Target: {fileID: 0}
-  Speed: 1
+  Speed: 1.5
   SpawnerEnnemy: {fileID: 0}
 --- !u!61 &1416871498115642211
 BoxCollider2D:
