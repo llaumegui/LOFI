@@ -653,7 +653,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.05, y: 0.4}
+  m_Size: {x: 0.1, y: 0.45}
   m_Direction: 0
 --- !u!50 &6943055337011259567
 Rigidbody2D:
@@ -1146,8 +1146,7 @@ MonoBehaviour:
   GunBack: {fileID: 1916591874902189405}
   Bullet: {fileID: 667193818322171349, guid: 2b48e5116dccb7a419b9d13e6052aab7, type: 3}
   BlackScreen: {fileID: 0}
-  EndScreen: {fileID: 0}
-  Speed: 3
+  Speed: 5
   MaxCrosshairDistance: 1
   SlashCooldown: 1
   ShootCooldown: 0.25

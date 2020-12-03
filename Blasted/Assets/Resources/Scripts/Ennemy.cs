@@ -123,7 +123,7 @@ public class Ennemy : MonoBehaviour
 
 	IEnumerator Hurt(bool sword = false)
 	{
-		SoundManager.PlaySound(SoundManager.Sound.Kill);
+		SoundManager.PlaySound(SoundManager.Sound.Kill,.5f);
 
 		if (!sword)
 			HP--;

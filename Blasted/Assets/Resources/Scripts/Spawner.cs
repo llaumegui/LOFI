@@ -168,7 +168,7 @@ public class Spawner : MonoBehaviour
 			_ennemies.Add(ennemy);
 
 			if (!IsFinalZone)
-			SoundManager.PlaySound(SoundManager.Sound.Spawn);
+			SoundManager.PlaySound(SoundManager.Sound.Spawn,.75f);
 		}
 		else
 			SpawningEnnemy();

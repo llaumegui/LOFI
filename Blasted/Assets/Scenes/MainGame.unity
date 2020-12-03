@@ -25040,24 +25040,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4682789446409281865, guid: 63e36f8cff0b30449a3549a4c05abe6b,
         type: 3}
-      propertyPath: Speed
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4682789446409281865, guid: 63e36f8cff0b30449a3549a4c05abe6b,
-        type: 3}
-      propertyPath: _sword
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4682789446409281865, guid: 63e36f8cff0b30449a3549a4c05abe6b,
-        type: 3}
-      propertyPath: _gun
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4682789446409281865, guid: 63e36f8cff0b30449a3549a4c05abe6b,
-        type: 3}
       propertyPath: BlackScreen
       value: 
       objectReference: {fileID: 983232474}
+    - target: {fileID: 4682789446409281865, guid: 63e36f8cff0b30449a3549a4c05abe6b,
+        type: 3}
+      propertyPath: SlashCooldown
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 5063109568947216780, guid: 63e36f8cff0b30449a3549a4c05abe6b,
         type: 3}
       propertyPath: m_RootOrder

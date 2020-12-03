@@ -65,14 +65,14 @@ public class MainMenu : MonoBehaviour
 			_antispamUP = true;
 			_antispamDown = false;
 			CheckOutOfRange(-1);
-			SoundManager.PlaySound(SoundManager.Sound.MenuMove, 10);
+			SoundManager.PlaySound(SoundManager.Sound.MenuMove, 1);
 		}
 		if (Input.GetAxisRaw("Vertical") < -.75f && !_antispamDown)
 		{
 			_antispamUP = false;
 			_antispamDown = true;
 			CheckOutOfRange(+1);
-			SoundManager.PlaySound(SoundManager.Sound.MenuMove, 10);
+			SoundManager.PlaySound(SoundManager.Sound.MenuMove, 1);
 		}
 
 		if(Input.GetAxisRaw("Vertical") == 0)
@@ -84,7 +84,7 @@ public class MainMenu : MonoBehaviour
 		if(Input.GetButtonDown("Action"))
 		{
 			menus[_selected].menu.Select();
-			SoundManager.PlaySound(SoundManager.Sound.MenuOk, 10);
+			SoundManager.PlaySound(SoundManager.Sound.MenuOk, 1);
 		}
 	}
 

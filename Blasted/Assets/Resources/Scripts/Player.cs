@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
 	public Transform Sword;
 	public Transform SwordUI;
 	public Transform Legs;
+	Transform _swordCollider;
 
 	[Header("GameObjects")]
 	public GameObject SwordBack;
@@ -75,6 +76,7 @@ public class Player : MonoBehaviour
 		Gun.gameObject.SetActive(false);
 		SwordUI.gameObject.SetActive(false);
 		Legs.gameObject.SetActive(false);
+		_swordCollider = Sword.GetChild(0);
 
 		_sheathe = Sheathe();
 
@@ -99,6 +101,9 @@ public class Player : MonoBehaviour
 
 		if (_sword || _gun)
 			ShowWeapons();
+
+		if(_usingSword)
+			_swordCollider.localPosition = Vector3.zero;
 	}
 
 	private void FixedUpdate()
@@ -213,7 +218,6 @@ public class Player : MonoBehaviour
 
 	void Slash()
 	{
-		Sword.GetChild(0).localPosition = Vector3.zero;
 		_usingSword = true;
 		_canUseSword = false;
 
@@ -229,7 +233,7 @@ public class Player : MonoBehaviour
 		yield return new WaitForSeconds(SlashCooldown);
 		_canUseSword = true;
 
-		SoundManager.PlaySound(SoundManager.Sound.MenuOk);
+		SoundManager.PlaySound(SoundManager.Sound.MenuOk,.75f);
 	}
 
 	void Shoot()
@@ -267,7 +271,7 @@ public class Player : MonoBehaviour
 		if(collision.gameObject.tag == "Ennemy")
 		{
 			if(!Hurt)
-				SoundManager.PlaySound(SoundManager.Sound.Dead);
+				SoundManager.PlaySound(SoundManager.Sound.Dead,.75f);
 			Hurt = true;
 			StartCoroutine(FadeOut());
 		}
@@ -293,7 +297,7 @@ public class Player : MonoBehaviour
 				Legs.GetChild(1).gameObject.SetActive(true);
 			}
 
-			SoundManager.PlaySound(SoundManager.Sound.Walk);
+			SoundManager.PlaySound(SoundManager.Sound.Walk,.5f);
 
 		}
 		else

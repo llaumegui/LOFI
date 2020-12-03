@@ -25,7 +25,7 @@ public class TakePickup : TriggerSpawner
 
 			StartCoroutine(_ennemySpawner.Script.Waiting());
 
-			SoundManager.PlaySound(SoundManager.Sound.Pickup);
+			SoundManager.PlaySound(SoundManager.Sound.Pickup,.75f);
 		}
 	}
 
