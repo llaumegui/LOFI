@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +8,7 @@ public class MainMenu : MonoBehaviour
 {
 	int _selected;
 	[SerializeField] bool _inGame;
+	bool _isSub;
 
 	[System.Serializable]
 	public class MenuSelected
@@ -16,18 +18,44 @@ public class MainMenu : MonoBehaviour
 		public GameObject Deselection;
 	}
 
-	[SerializeField] MenuSelected[] menus;
+	[SerializeField] MenuSelected[] mainmenu;
+	[SerializeField] MenuSelected[] submenu;
+	MenuSelected[] menus;
+
+	public static Action CallChange;
 
 	bool _antispamUP;
 	bool _antispamDown;
 
 	private void Start()
 	{
+		CallChange += SwitchMenu;
+
 		_selected = 0;
+
+		menus = mainmenu;
 
 		UpdateSelection();
 
 		PlayMusic();
+	}
+
+	void SwitchMenu()
+    {
+		_selected = 0;
+
+        if (_isSub)
+        {
+			menus = mainmenu;
+		} 
+		else
+        {
+			menus = submenu;
+		}
+		_isSub = !_isSub;
+		
+
+		UpdateSelection();
 	}
 
 	void PlayMusic()

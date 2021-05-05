@@ -15,6 +15,7 @@ public class Play : Menu
 		Debug.Log("je lance le jeu");
 
 		yield return new WaitForSeconds(.5f);
+
 		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
 	}
 }
