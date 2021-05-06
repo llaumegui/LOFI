@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
@@ -9,6 +10,7 @@ public class MainMenu : MonoBehaviour
 	int _selected;
 	[SerializeField] bool _inGame;
 	bool _isSub;
+	bool _isLocked;
 
 	[System.Serializable]
 	public class MenuSelected
@@ -23,6 +25,8 @@ public class MainMenu : MonoBehaviour
 	MenuSelected[] menus;
 
 	public static Action CallChange;
+	public static Action<bool> EditChange;
+	public static Action<string> PlayCoop;
 
 	bool _antispamUP;
 	bool _antispamDown;
@@ -30,6 +34,8 @@ public class MainMenu : MonoBehaviour
 	private void Start()
 	{
 		CallChange += SwitchMenu;
+		EditChange += LockNavigation;
+		PlayCoop += PlayCoopMode;
 
 		_selected = 0;
 
@@ -57,6 +63,11 @@ public class MainMenu : MonoBehaviour
 
 		UpdateSelection();
 	}
+
+	void LockNavigation(bool locked)
+    {
+		_isLocked = locked;
+    }
 
 	void PlayMusic()
 	{
@@ -88,28 +99,32 @@ public class MainMenu : MonoBehaviour
 
 	void Navigation()
 	{
-		if(Input.GetAxisRaw("Vertical") > .75f && !_antispamUP)
+		if (!_isLocked)
 		{
-			_antispamUP = true;
-			_antispamDown = false;
-			CheckOutOfRange(-1);
-			SoundManager.PlaySound(SoundManager.Sound.MenuMove, 1);
-		}
-		if (Input.GetAxisRaw("Vertical") < -.75f && !_antispamDown)
-		{
-			_antispamUP = false;
-			_antispamDown = true;
-			CheckOutOfRange(+1);
-			SoundManager.PlaySound(SoundManager.Sound.MenuMove, 1);
+			if (Input.GetAxisRaw("Vertical") > .75f && !_antispamUP)
+			{
+				_antispamUP = true;
+				_antispamDown = false;
+				CheckOutOfRange(-1);
+				SoundManager.PlaySound(SoundManager.Sound.MenuMove, 1);
+			}
+			if (Input.GetAxisRaw("Vertical") < -.75f && !_antispamDown)
+			{
+				_antispamUP = false;
+				_antispamDown = true;
+				CheckOutOfRange(+1);
+				SoundManager.PlaySound(SoundManager.Sound.MenuMove, 1);
+			}
+
+			if (Input.GetAxisRaw("Vertical") == 0)
+			{
+				_antispamDown = false;
+				_antispamUP = false;
+			}
+
 		}
 
-		if(Input.GetAxisRaw("Vertical") == 0)
-		{
-			_antispamDown = false;
-			_antispamUP = false;
-		}
-
-		if(Input.GetButtonDown("Action"))
+		if (Input.GetButtonDown("Action"))
 		{
 			menus[_selected].menu.Select();
 			SoundManager.PlaySound(SoundManager.Sound.MenuOk, 1);
@@ -120,5 +135,10 @@ public class MainMenu : MonoBehaviour
 	{
 		_selected = _selected + plusOrMinus == menus.Length || _selected + plusOrMinus < 0 ? _selected : _selected + plusOrMinus;
 		UpdateSelection();
+	}
+
+	void PlayCoopMode(string code)
+    {
+		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
 	}
 }
