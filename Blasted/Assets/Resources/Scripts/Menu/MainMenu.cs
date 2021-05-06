@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
@@ -139,6 +138,25 @@ public class MainMenu : MonoBehaviour
 
 	void PlayCoopMode(string code)
     {
-		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
+		if(code.Equals("00000"))
+        {
+			NetworkManager.Instance.CreateRoom(GenerateCode());
+        }
+        else
+        {
+			NetworkManager.Instance.JoinRoom(code);
+		}
 	}
+
+	string GenerateCode()
+    {
+		string code = "";
+
+		for(int i = 0; i < 5; i++)
+        {
+			code += (char)UnityEngine.Random.Range(65, 90);
+        }
+
+		return code;
+    }
 }
