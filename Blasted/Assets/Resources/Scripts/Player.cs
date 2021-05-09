@@ -217,9 +217,9 @@ public class Player : MonoBehaviourPunCallbacks
 
 		Broadcast("Move", joueur + ";" + _direction.x +";" + _direction.y);
 
+		Broadcast("SetPosition", joueur + ";" + transform.position.x + ";" + transform.position.y);
 
-
-		if(CanMoveCrosshair)
+		if (CanMoveCrosshair)
 		CrosshairMove();
 
 		
@@ -236,6 +236,17 @@ public class Player : MonoBehaviourPunCallbacks
 			_rb.velocity = _direction * Speed;
 
 			ApplyRotation();
+		}
+	}
+
+	[PunRPC]
+	public void SetPosition(string message)
+	{
+		Debug.Log(message);
+		string[] msg = message.Split(';');
+		if (joueur == int.Parse(msg[0]))
+		{
+			transform.position = new Vector3(Convert.ToSingle(msg[1]), Convert.ToSingle(msg[2]), 0f);
 		}
 	}
 

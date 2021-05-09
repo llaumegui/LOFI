@@ -13,6 +13,8 @@ public class GameMaster : MonoBehaviour
 
 	private void Awake()
 	{
+		Screen.SetResolution(1720, 1000, false);
+
 		if (WASD)
 			EnableWASD = true;
 		else
