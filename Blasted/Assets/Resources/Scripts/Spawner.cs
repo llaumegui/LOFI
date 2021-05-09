@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class Spawner : MonoBehaviour
 {
 	[HideInInspector]
-	public bool _triggered;
+	public int _triggered = 0;
 	bool _playerInside;
 	bool _antispam;
 	bool _cleared;
@@ -14,6 +14,7 @@ public class Spawner : MonoBehaviour
 	public GameObject Ennemy;
 	public GameObject Player;
 	public GameObject Bounds;
+	public int nb = 2;
 	[HideInInspector] public Player Script;
 	Rect _area;
 	public Vector2 SizeArea;
@@ -63,7 +64,7 @@ public class Spawner : MonoBehaviour
 
 	private void Update()
 	{
-		if (_triggered && _playerInside && !_antispam && !_cleared)
+		if (_triggered == nb && _playerInside && !_antispam && !_cleared)
 		{
 			_antispam = true;
 			StartCoroutine(_spawns);
@@ -84,7 +85,7 @@ public class Spawner : MonoBehaviour
 			Script.LoopToPlay = AfterFightLoop;
 		}
 
-		if (IsFinalZone && _triggered)
+		if (IsFinalZone && _triggered == 2)
 		{
 			FinalScore.text = _ennemiesKilled.ToString();
 		}

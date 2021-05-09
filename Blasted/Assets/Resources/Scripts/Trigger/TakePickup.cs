@@ -15,13 +15,19 @@ public class TakePickup : TriggerSpawner
 			_pickedUp = true;
 			Player script = collision.gameObject.GetComponent<Player>();
 			if (SwordOrGun)
+			{
+				if (script._sword) return;
 				script._sword = true;
+			}
 			else
+			{
+				if (script._gun) return;
 				script._gun = true;
+			}
 
 			Pickup.SetActive(false);
 
-			_ennemySpawner._triggered = true;
+			_ennemySpawner._triggered += 1;
 
 			StartCoroutine(_ennemySpawner.Script.Waiting());
 

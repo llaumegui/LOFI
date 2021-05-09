@@ -138,12 +138,16 @@ public class MainMenu : MonoBehaviour
 
 	void PlayCoopMode(string code)
     {
-		if(code.Equals("00000"))
+		Debug.Log(code);
+
+		if (code.Equals("00000"))
         {
+			Debug.Log("HOST");
 			NetworkManager.Instance.CreateRoom(GenerateCode());
         }
         else
         {
+			Debug.Log("JOIN");
 			NetworkManager.Instance.JoinRoom(code);
 		}
 	}

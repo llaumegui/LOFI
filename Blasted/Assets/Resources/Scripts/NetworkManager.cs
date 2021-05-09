@@ -9,6 +9,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public static NetworkManager Instance;
 
     public string code;
+    public bool hosting;
 
     private void Awake()
     {
@@ -37,16 +38,23 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.CreateRoom(roomName);
         code = roomName;
-    }
-
-    public override void OnCreatedRoom()
-    {
-        SceneManager.LoadScene("CoopGame");
+        hosting = true;
     }
 
     public void JoinRoom(string roomName)
     {
-        PhotonNetwork.CreateRoom(roomName);
+        PhotonNetwork.JoinRoom(roomName);
         code = roomName;
+        hosting = false;
     }
+
+    public override void OnJoinedRoom()
+    {
+        
+        SceneManager.LoadScene("CoopGame");
+    }
+
+
+
+
 }

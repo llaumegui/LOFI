@@ -1,10 +1,15 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviourPunCallbacks
 {
+	public bool isPlayer;
+	public int joueur = 1;
+
 	Transform _thisTransform;
 
 	[Header ("Transforms")]
@@ -69,6 +74,26 @@ public class Player : MonoBehaviour
 
 	private void Awake()
 	{
+		Debug.Log(NetworkManager.Instance.hosting);
+		if(NetworkManager.Instance.hosting == true)
+        {
+			Debug.Log("hosted");
+			if (joueur == 1) isPlayer = true;
+			if (joueur == 2) isPlayer = false;
+		}
+		else
+        {
+			Debug.Log("joined");
+			if (joueur == 2) isPlayer = true;
+			if (joueur == 1) isPlayer = false;
+		}
+
+		gameObject.AddComponent<PhotonView>();
+		photonView.ViewID = joueur;
+
+		_camera.gameObject.SetActive(isPlayer);
+		_crosshair.gameObject.SetActive(isPlayer);
+
 		LoopToPlay = SoundManager.Sound.MusicMenu;
 		_endScreen = GetComponent<TV>();
 
@@ -92,12 +117,19 @@ public class Player : MonoBehaviour
 		StartCoroutine(FadeIn(1));
 	}
 
+	public void Broadcast(string type, string message)
+	{
+		photonView.RPC(type, RpcTarget.All, message);
+	}
+
 	private void Update()
 	{
+		if (!isPlayer) return;
+
 		if (Input.GetMouseButtonDown(0) && _sword && CanMove && _canUseSword)
-			Slash();
+			Broadcast("Slash", joueur+ ";" + _head.up.x + ";" + _head.up.y);
 		if (Input.GetMouseButton(1) && _gun && CanMove && _canShoot)
-			Shoot();
+			Broadcast("Shoot", joueur+";"+_head.up.x + ";" + _head.up.y);
 
 		if (_sword || _gun)
 			ShowWeapons();
@@ -108,7 +140,9 @@ public class Player : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		if(CanMove)
+		if (!isPlayer) return;
+
+		if (CanMove)
 		Movement();
 	}
 
@@ -181,14 +215,30 @@ public class Player : MonoBehaviour
 
 		_direction = new Vector2(_horizontal, _vertical);
 
-		_rb.velocity = _direction * Speed;
+		Broadcast("Move", joueur + ";" + _direction.x +";" + _direction.y);
+
+
 
 		if(CanMoveCrosshair)
 		CrosshairMove();
 
-		ApplyRotation();
+		
 
 	}
+
+	[PunRPC]
+	public void Move(string message)
+	{
+		string[] msg = message.Split(';');
+		if (joueur == int.Parse(msg[0]))
+		{
+			_direction = new Vector2(Convert.ToSingle(msg[1]), Convert.ToSingle(msg[2]));
+			_rb.velocity = _direction * Speed;
+
+			ApplyRotation();
+		}
+	}
+
 
 	void CrosshairMove()
 	{
@@ -216,14 +266,22 @@ public class Player : MonoBehaviour
 		_body.rotation = Quaternion.Slerp(_body.rotation, Quaternion.Euler(0, 0, targetAngle), .25f);
 	}
 
-	void Slash()
+	[PunRPC]
+	public void Slash(string message)
 	{
-		_usingSword = true;
-		_canUseSword = false;
+		Debug.Log(message);
+		string[] msg = message.Split(';');
+		if (joueur == int.Parse(msg[0]))
+		{
+			_head.up = new Vector3(Convert.ToSingle(msg[1]), Convert.ToSingle(msg[2]),0f);
 
-		StartCoroutine(SwordCoolDown());
+			_usingSword = true;
+			_canUseSword = false;
 
-		SoundManager.PlaySound(SoundManager.Sound.Woosh);
+			StartCoroutine(SwordCoolDown());
+
+			SoundManager.PlaySound(SoundManager.Sound.Woosh);
+		}
 	}
 
 	IEnumerator SwordCoolDown()
@@ -236,21 +294,29 @@ public class Player : MonoBehaviour
 		SoundManager.PlaySound(SoundManager.Sound.MenuOk,.75f);
 	}
 
-	void Shoot()
+	[PunRPC]
+	public void Shoot(string message)
 	{
-		_usingGun = true;
+		Debug.Log(message);
+		string[] msg = message.Split(';');
+		if (joueur == int.Parse(msg[0]))
+		{
+			_head.up = new Vector3(Convert.ToSingle(msg[1]), Convert.ToSingle(msg[2]), 0f);
 
-		StartCoroutine(ShootingCooldown());
+			_usingGun = true;
 
-		StopCoroutine(_sheathe);
-		_sheathe = Sheathe();
-		StartCoroutine(_sheathe);
+			StartCoroutine(ShootingCooldown());
 
-		Vector2 direction = _head.up;
-		GameObject bullet = Instantiate(Bullet, (Vector2)transform.position + direction, Quaternion.identity);
-		bullet.GetComponent<Bullet>().Direction = direction.normalized;
+			StopCoroutine(_sheathe);
+			_sheathe = Sheathe();
+			StartCoroutine(_sheathe);
 
-		SoundManager.PlaySound(SoundManager.Sound.Woosh);
+			Vector2 direction = _head.up;
+			GameObject bullet = Instantiate(Bullet, (Vector2)transform.position + direction, Quaternion.identity);
+			bullet.GetComponent<Bullet>().Direction = direction.normalized;
+
+			SoundManager.PlaySound(SoundManager.Sound.Woosh);
+		}
 	}
 
 	IEnumerator ShootingCooldown()
